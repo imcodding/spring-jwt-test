@@ -2,9 +2,12 @@ package spring.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
 import java.sql.Date;
 import java.time.ZonedDateTime;
 import java.util.Base64;
@@ -14,7 +17,9 @@ import java.util.Map;
 @Component
 public class JwtTokenProvider {
 
-    private String secretKey = "HELLO_KEY";
+    @Value("${JWT.ISSUER}")
+    private String secretKey;
+    @Value("${JWT.SECRET}")
     private String issuer;
 
     //토큰 유효시간 30분
@@ -30,13 +35,13 @@ public class JwtTokenProvider {
         try {
             final ZonedDateTime now = ZonedDateTime.now();
             return JWT.create()
-                    .withHeader(creatJwtHeader())
-                    .withIssuer(issuer)
+                    .withHeader(creatJwtHeader()) //헤더타입 설정(JWT)
+                    .withIssuer(issuer) //발급자
+                    .withIssuedAt(Date.from(now.toInstant())) //발급시간
+                    .withExpiresAt(Date.from(now.toInstant().plusSeconds(tokenValidTime))) //만료시간
                     .withClaim("email", String.valueOf(email))
-                    .withIssuedAt(Date.from(now.toInstant()))
-                    .withExpiresAt(Date.from(now.toInstant().plusSeconds(tokenValidTime)))
-                    .sign(Algorithm.HMAC512(secretKey));
-        } catch (Exception e) {
+                    .sign(Algorithm.HMAC256(secretKey));
+        } catch (JWTCreationException | UnsupportedEncodingException e) {
             return "토큰 생성 실패";
         }
     }

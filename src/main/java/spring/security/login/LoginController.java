@@ -1,16 +1,20 @@
 package spring.security.login;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import spring.security.jwt.JwtTokenProvider;
+
+import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 public class LoginController {
 
+    private final JwtTokenProvider jwtTokenProvider;
     @PostMapping("/login")
-    public String login(@RequestParam String email, @RequestParam String password) {
+    public String login(@RequestBody Map<String, String> map) {
 
-        return "ok";
+        return jwtTokenProvider.createToken(map.get("email"));
     }
 }
