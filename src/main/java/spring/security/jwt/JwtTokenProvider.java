@@ -17,9 +17,9 @@ import java.util.Map;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${JWT.ISSUER}")
-    private String secretKey;
     @Value("${JWT.SECRET}")
+    private String secretKey;
+    @Value("${JWT.ISSUER}")
     private String issuer;
 
     //토큰 유효시간 30분
